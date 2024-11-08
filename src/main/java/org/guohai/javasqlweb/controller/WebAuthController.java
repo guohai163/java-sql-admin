@@ -1,21 +1,28 @@
 package org.guohai.javasqlweb.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.yubico.webauthn.data.PublicKeyCredential;
+import com.yubico.webauthn.data.PublicKeyCredentialRequestOptions;
 import org.guohai.javasqlweb.beans.Result;
+
 import org.guohai.javasqlweb.beans.UserBean;
-import org.guohai.javasqlweb.beans.webauth.PublicKeyCredential;
-import org.guohai.javasqlweb.beans.webauth.PublicKeyCredentialCreationOptions;
-import org.guohai.javasqlweb.beans.webauth.PublicKeyCredentialRequestOptions;
+import org.guohai.javasqlweb.service.webauthn.WebAuthService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 
 /**
  * web auth类
  */
 @Controller
+@RequestMapping(value = "/webauthn")
+@CrossOrigin
 public class WebAuthController {
 
+    @Autowired
+    WebAuthService webAuthService;
 
     /**
      * 第一步服务 端创建PublicKeyCredentialCreationOptions对象 ，
@@ -24,8 +31,8 @@ public class WebAuthController {
      */
     @ResponseBody
     @RequestMapping(value = "/create")
-    public Result<PublicKeyCredentialCreationOptions> create(@RequestHeader(value = "User-Token", required =  false) String token){
-        return null;
+    public Result<String> create(@RequestHeader(value = "User-Token", required =  false) String token){
+        return webAuthService.create(token);
     }
 
     /**
@@ -36,8 +43,8 @@ public class WebAuthController {
     @ResponseBody
     @RequestMapping(value = "/register")
     public Result<String> register(@RequestHeader(value = "User-Token", required =  false) String token,
-                                   PublicKeyCredential credential){
-        return null;
+                                   @RequestBody  String body) throws IOException {
+        return webAuthService.register(token, body);
     }
 
     /**
@@ -46,18 +53,19 @@ public class WebAuthController {
      */
     @ResponseBody
     @RequestMapping(value = "/get")
-    public Result<PublicKeyCredentialRequestOptions> get(){
-        return null;
+    public Result<String> get(@RequestHeader(value = "Session-key", required =  false) String session) throws JsonProcessingException {
+        return  webAuthService.get(session);
     }
 
     /**
      *
-     * @param credential
+     * @param body
      * @return
      */
     @ResponseBody
     @RequestMapping(value = "/signin")
-    public Result<String> signin(PublicKeyCredential credential){
-        return null;
+    public Result<UserBean> signin(@RequestHeader(value = "Session-key", required =  false) String session,
+                                   @RequestBody  String body) throws IOException {
+        return webAuthService.signIn(body,session);
     }
 }
