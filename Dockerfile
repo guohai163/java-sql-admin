@@ -20,8 +20,8 @@ RUN mv build ../src/main/resources/public/ && \
 
 FROM openjdk:11.0.16
 
-COPY target/*.jar /opt/program.jar
-COPY src/main/resources/application.yml /opt/conf/application.yml
+COPY --from=build-jdk /opt/jsw/target/*.jar /opt/program.jar
+COPY --from=build-jdk /opt/jsw/src/main/resources/application.yml /opt/conf/application.yml
 
 EXPOSE 8002
 
