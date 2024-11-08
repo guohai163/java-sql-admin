@@ -1,4 +1,24 @@
-FROM gcontainer/centos7-jdk:openjdk11u8
+FROM node:16 AS build-node
+
+WORKDIR /opt/jsw
+
+ COPY . .
+
+ RUN npm install && \
+    npm run build && \
+    rm -rf ../src/main/resources/public/
+
+
+FROM maven:3.8.6-openjdk-11 AS build-jdk
+
+COPY --from=build-node /opt/jsw /opt/jsw
+WORKDIR /opt/jsw
+
+RUN mv build ../src/main/resources/public/ && \
+    mvn clean package -U -DskipTests
+
+
+FROM openjdk:11.0.16
 
 COPY target/*.jar /opt/program.jar
 COPY src/main/resources/application.yml /opt/conf/application.yml
